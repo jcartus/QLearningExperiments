@@ -39,11 +39,12 @@ class AgentBase(object):
         if np.random.rand() >= self._epsilon:
 
             # choose random action
-            print(self._env._actions)
             action = np.random.choice(self._env.actions)
 
         else:
             action = self._find_q_optimal_action(self._current_state)
+
+        return action
 
     def _find_q_optimal_action(self, current_state):
         """Find the action which as the highest entry in the Q table for the 
@@ -60,17 +61,17 @@ class AgentBase(object):
         """This is the Q Learning part of the project. We use the Bellman
         equation to update the Q-table"""
 
-        q_old = self._q_table[state, action]
+        q_old = self._q_table[old_state, action]
 
         q_new = \
             q_old + \
             self._alpha * (
                 reward + \
-                self._gamma * np.max(self._q_table[state]) \
+                self._gamma * np.max(self._q_table[new_state]) \
                 - q_old
             )  
 
-        self._q_table[state, action] = q_new 
+        self._q_table[old_state, action] = q_new 
 
     def _measure_reward_of_last_action(self):
         return self._env.reward(
@@ -81,7 +82,7 @@ class AgentBase(object):
     def run_episode(self):
         """This runs a single episode, i.e. one game run."""
 
-        
+        self._init_episode_statistics()
 
         while not self._env.is_episode_finished():
 
@@ -117,7 +118,7 @@ class AgentBase(object):
         self._episode_statistics["state"].append(self._current_state)
         self._episode_statistics["q_table"].append(self._q_table.copy())
 
-    def _collect_action_statictics(self, action, reward):
+    def _collect_episode_statistics(self, action, reward):
         """Do some logging for later analysis"""
         self._episode_statistics["state"].append(self._current_state)
         self._episode_statistics["action"].append(action)

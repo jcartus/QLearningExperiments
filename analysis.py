@@ -22,11 +22,11 @@ class AnalyzerEpisode(object):
 
     def plot_reward(self):
         
-        figsize = self._set_font_defaults(self)
+        figsize = self._set_font_defaults()
 
         plt.figure(figsize=figsize)
 
-        plt.plot(self.index, self.data["reward"])
+        plt.plot(self.index[1:], self.data["reward"], "x-")
         
         plt.xlabel("nr. of action / 1", fontsize=16)
         plt.ylabel("Reward / 1", fontsize=16)

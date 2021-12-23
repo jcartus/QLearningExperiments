@@ -22,8 +22,8 @@ def main():
 
     agent = AgentBase(
         environment=environment,
-        discount_factor=1,
-        learning_rate=0.3,
+        discount_factor=0.7,
+        learning_rate=0.1,
         epsilon_greedyness=0.4
     )
 
@@ -32,5 +32,6 @@ def main():
     analyzer = AnalyzerEpisode(episode_statistics=agent._episode_statistics)
     analyzer.plot_reward()
 
+    plt.show()
 if __name__ == '__main__':
     main()

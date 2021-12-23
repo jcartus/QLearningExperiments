@@ -86,7 +86,7 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         # Example 1D: +1 is move right, -1 is move left 
         actions = []
         for dim in range(len(game_map.shape)):
-            if dim > 1:
+            if game_map.shape[dim] > 1:
                 action = np.zeros_like(game_map.shape)
                 
                 # +1
@@ -94,7 +94,7 @@ class DiscreteEnvironment(EnvironmentBaseClass):
                 actions.append(action)
 
                 # -1
-                action[dim] = 1
+                action[dim] = -1
                 actions.append(action)
             
         return actions            
@@ -112,7 +112,7 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         return self._state_from_position(self.current_position)
 
     def perform_action(self, action):
-
+        
         # advance action counter
         self._n_actions_performed += 1
 
