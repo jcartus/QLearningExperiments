@@ -39,6 +39,13 @@ class EnvironmentBaseClass(object):
     def actions(self):
         return np.arange(len(self._actions))
 
+    def initialize(self):
+        """Set the inital state, etc."""
+
+        self._n_actions_performed = 0
+
+        raise NotImplementedError("Depends on the concrete states")
+
     def perform_action(self, action):
         """Performs the action / moves the player / updates the current state.
         
@@ -58,7 +65,7 @@ class EnvironmentBaseClass(object):
 
 class DiscreteEnvironment(EnvironmentBaseClass):
 
-    def __init__(self, game_map, max_actions=10):
+    def __init__(self, game_map, max_actions=50):
         """Args:
 
         game_map <np.ndarray>: 1D array specifying the reward for moving to the 
@@ -72,10 +79,15 @@ class DiscreteEnvironment(EnvironmentBaseClass):
 
         self._actions = self._generate_actions(self.game_map)
 
+        self._max_actions = max_actions
+
+    def initialize(self):
+        """Set the inital state"""
+
         # start at [0,0,..]
         self.current_position = np.zeros_like(self.game_map.shape)
 
-        self._max_actions = max_actions
+        self._n_actions_performed = 0
 
     @property
     def n_states(self):
@@ -87,15 +99,13 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         actions = []
         for dim in range(len(game_map.shape)):
             if game_map.shape[dim] > 1:
-                action = np.zeros_like(game_map.shape)
                 
-                # +1
-                action[dim] = 1
-                actions.append(action)
+                
+                for direction in [+1, -1]:
 
-                # -1
-                action[dim] = -1
-                actions.append(action)
+                    action = np.zeros_like(game_map.shape)
+                    action[dim] = direction
+                    actions.append(action)
             
         return actions            
 
@@ -142,7 +152,10 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         # the worst field in the map is like dying
         has_died = self.current_state == np.argmin(self.game_map) # argmin gives linear index aka state ;)
 
-        return max_iter_exceeded or has_died
+        # the best field marks the goal
+        has_reached_goal = self.current_state == np.argmin(self.game_map)
+        
+        return max_iter_exceeded or has_died or has_reached_goal
 
 class DiscreteEnvironment1D(DiscreteEnvironment):
 

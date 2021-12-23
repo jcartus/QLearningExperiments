@@ -82,10 +82,17 @@ class AgentBase(object):
     def run_episode(self):
         """This runs a single episode, i.e. one game run."""
 
-        self._init_episode_statistics()
+        step_count = -1
+        self._init_episode_statistic()
+
+        # set the initial state
+        self._env.initialize()
 
         while not self._env.is_episode_finished():
+            
+            step_count += 1
 
+            
             # choose an action 
             action = self._select_next_action()
 
@@ -104,25 +111,51 @@ class AgentBase(object):
             )
 
             # do some logging for later analysis & plotting
-            self._collect_episode_statistics(action, reward)
+            self._collect_episode_statistics(step_count, action, reward)
     
+
     def run(self, n_episodes):
 
         for i in range(n_episodes):
+
             self.run_episode()
 
-    def _init_episode_statistics(self):
-        """Init some buffers for logging later, and do some initial logging"""
+            self._collect_run_statistics(i)
+
+    def _init_episode_statistic(self):
+        """Init buffer for logging"""
         self._episode_statistics = defaultdict(list)
 
-        self._episode_statistics["state"].append(self._current_state)
-        self._episode_statistics["q_table"].append(self._q_table.copy())
-
-    def _collect_episode_statistics(self, action, reward):
+    def _collect_episode_statistics(self, step, action, reward):
         """Do some logging for later analysis"""
-        self._episode_statistics["state"].append(self._current_state)
+
+        self._episode_statistics["step"].append(step)
+        self._episode_statistics["old_state"].append(self._env.previous_state)
+        self._episode_statistics["new_state"].append(self._current_state)
         self._episode_statistics["action"].append(action)
         self._episode_statistics["reward"].append(reward)
         self._episode_statistics["q_table"].append(self._q_table.copy())
+
+    def _collect_run_statistics(self, episode):
+        """Do more logging, over many episodes."""
+
+        if not hasattr(self, "_run_statistics"):
+            self._run_statistics = defaultdict(list)
+
+        n_steps = self._env._n_actions_performed
+
+        self._run_statistics["episode"] += [episode]*n_steps
+        self._run_statistics["n_steps"] += [n_steps]*n_steps
+        
+
+        for x in ["old_state", "new_state", "action", "reward"]:
+            self._run_statistics[x] += self._episode_statistics[x]
+
+    @property
+    def n_steps_run(self):
+        try:
+            return self._run_statistics["n_steps"]
+        except AttributeError:
+            return [0]
 
 

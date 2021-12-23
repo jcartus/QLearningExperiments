@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 
 from environment import DiscreteEnvironment1D
 from agent import AgentBase
-from analysis import AnalyzerEpisode
+from analysis import AnalyzerEpisode, AnalyzerRun
+
+import seaborn as sns
 
 def generate_course():
-    return np.array([0, 0, 1, 0, 0, 6, 0, -10, 0])
+    return np.array([0, 0, 0, 1, 0, 16, 0, -20, 1, 0, 0])
 
 def main():
 
@@ -24,14 +26,26 @@ def main():
         environment=environment,
         discount_factor=0.7,
         learning_rate=0.1,
-        epsilon_greedyness=0.4
+        epsilon_greedyness=0.2
     )
 
-    agent.run_episode()
+    agent.run(n_episodes=50)
 
-    analyzer = AnalyzerEpisode(episode_statistics=agent._episode_statistics)
-    analyzer.plot_reward()
+    analysis = AnalyzerRun(run_statistics=agent._run_statistics)
+
+    plt.figure(figsize=(6, 9))
+    n = 3
+    plt.subplot(n, 1, 1)
+    analysis.plot_steps()
+    plt.subplot(n, 1, 2)
+    analysis.plot_reward()
+    plt.subplot(n, 1, 3)
+    analysis.plot_actions()
+
+    plt.figure()
+    sns.heatmap(agent._q_table)
 
     plt.show()
+        
 if __name__ == '__main__':
     main()
