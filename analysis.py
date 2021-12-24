@@ -2,6 +2,9 @@
 Author: Johannes Cartus, 22.12.2021
 """
 
+import os
+from os.path import join
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas
@@ -110,3 +113,139 @@ class AnalyzerRun(object):
         plt.xlabel("episode / 1")
         plt.ylabel("x times selected / 1")
         plt.legend()
+
+
+class EpisodeAnimator(object):
+    """Creates a nice animation of the moves done during an episode"""
+
+    def __init__(self, game_map, states):
+
+        if len(game_map.shape) == 1:
+            self.game_map = game_map.reshape(-1, 1)
+
+        else:
+            self.game_map = game_map
+        
+
+        self.states = states
+
+        self.win = [np.argmax(self.game_map)]
+        self.death = [np.argmin(self.game_map)]
+
+    def position_from_state(self, state):
+        """State is a scalar index, get position on map"""
+        try:
+            x, y = np.unravel_index(state, self.game_map.shape)
+        except ValueError:
+            raise IndexError(f"State {state} out side of map (max: {self.game_map.size})")
+
+        return x, y
+
+    def annotate_field(self, state, txt):
+        """Add text to a field on the map"""
+        
+        x, y = self.position_from_state(state)
+        
+        plt.text(x, y, txt, ha="center", va="center", color="gray", fontdict={"fontweight": "bold", "fontsize": 14})
+        
+
+    def mark_position(self, state, color="blue"):
+        """Highlight a field on the map, e.g. to indicate 
+        the current position"""
+        from matplotlib.patches import Rectangle
+        x, y = self.position_from_state(state)
+        
+        plt.gca().add_patch(Rectangle((x-0.5, y-0.5), 1, 1, fill=False, edgecolor=color, lw=3))
+
+
+    def visualize_map(self):
+    
+        plt.imshow(self.game_map.transpose(), origin="lower")
+        
+        
+        xticks = np.arange(self.game_map.shape[0])
+        yticks = np.arange(self.game_map.shape[1])
+        plt.xticks(xticks, xticks)
+        plt.yticks(yticks, yticks)
+        
+        plt.xlabel("x")
+        plt.ylabel("y")
+        
+        #cbar = plt.colorbar()
+        #cbar.set_label("Gain")
+
+    def visualize_map_and_landmarks(self, start_state):
+    
+        # plot the map
+        self.visualize_map()
+
+        # add wins
+        for w in self.win:
+            self.annotate_field(w, "Win")
+        
+        # add deaths
+        for d in self.death:
+            self.annotate_field(d, "Death")
+        
+        # mark the start position
+        self.mark_position(start_state, color="grey")
+
+    def make_animation(self, fig, interval=200):
+        """Create and return an animation"""
+        import matplotlib.animation as animation
+
+        def init():
+            self.visualize_map_and_landmarks(start_state=self.states[0])
+            self.mark_position(self.states[0])
+
+        def animate(i):
+            plt.clf()
+            self.visualize_map_and_landmarks(start_state=self.states[0])
+            self.mark_position(self.states[i])
+
+
+        anim = animation.FuncAnimation(
+            fig, 
+            animate, 
+            init_func=init, 
+            frames=len(self.states), 
+            repeat=False,
+            interval=interval
+        )
+        
+        return anim
+
+
+def animate_episodes(agent, episodes=-1, save_path=None, show=False):
+    """Create an animation for moves in specified episodes."""
+
+    game_map = agent._env.game_map
+
+    df = pandas.DataFrame(agent._run_statistics)
+
+    if episodes == -1:
+        episodes = df["episode"].sort_values().unique()
+
+    for episode in np.atleast_1d(episodes):
+        
+        dfp = df[df.episode==episode]
+
+        # first old state must have been initial state
+        states = [dfp.old_state.to_list()[0]] + dfp.new_state.to_list() 
+
+        print(states)
+
+        animator = EpisodeAnimator(
+            game_map=game_map,
+            states=states, 
+        )
+
+        fig = plt.figure(figsize=(10, 4))
+
+        anim = animator.make_animation(fig=fig)
+
+        if save_path:
+            anim.save(join(save_path, f"episode_{episode}.png"))
+
+        if show:
+            plt.show()

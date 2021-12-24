@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from environment import DiscreteEnvironment1D
 from agent import AgentBase
-from analysis import AnalyzerEpisode, AnalyzerRun
+from analysis import AnalyzerEpisode, AnalyzerRun, animate_episodes
 
 import seaborn as sns
 
@@ -44,6 +44,9 @@ def main():
 
     plt.figure()
     sns.heatmap(agent._q_table)
+    
+    animate_episodes(agent, episodes=[0, 49], show=True, save_path="animations")
+
 
     plt.show()
         
