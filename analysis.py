@@ -93,8 +93,6 @@ class AnalyzerRun(object):
         reward_mean = [np.mean(self.df[self.df.episode == xi])["reward"] for xi in x]
         reward_std = [np.std(self.df[self.df.episode == xi])["reward"] for xi in x]
 
-        print(x, reward_mean)
-
         #plt.plot(x, reward_mean, "x-", label="reward")
         plt.errorbar(x, reward_mean, fmt="x-", yerr=reward_std, label="reward")
 
@@ -233,8 +231,6 @@ def animate_episodes(agent, episodes=-1, save_path=None, show=False):
         # first old state must have been initial state
         states = [dfp.old_state.to_list()[0]] + dfp.new_state.to_list() 
 
-        print(states)
-
         animator = EpisodeAnimator(
             game_map=game_map,
             states=states, 
@@ -245,7 +241,7 @@ def animate_episodes(agent, episodes=-1, save_path=None, show=False):
         anim = animator.make_animation(fig=fig)
 
         if save_path:
-            anim.save(join(save_path, f"episode_{episode}.png"))
+            anim.save(join(save_path, f"episode_{episode}.gif"))
 
         if show:
             plt.show()
