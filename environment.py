@@ -83,8 +83,8 @@ class DiscreteEnvironment(EnvironmentBaseClass):
 
         self.game_map = game_map
 
-        self.win_states = wins if wins else np.argmax(game_map)
-        self.death_states = deaths if deaths else np.argmin(game_map)
+        self.win_states = wins if not wins is None else np.argmax(game_map)
+        self.death_states = deaths if not deaths is None else np.argmin(game_map)
 
         self._actions = self._generate_actions(self.game_map)
 
@@ -166,7 +166,9 @@ class DiscreteEnvironment(EnvironmentBaseClass):
 
     def reward(self, old_state, new_state):
 
-        gain = self.game_map[new_state] - self.game_map[old_state] # state is just linear index
+        gain = \
+            self.game_map.flatten()[new_state] - \
+                self.game_map.flatten()[old_state] # state is just linear index
 
         if gain == 0:
             # if nothing was gained, punish the agent slightly
