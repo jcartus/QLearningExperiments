@@ -65,7 +65,13 @@ class EnvironmentBaseClass(object):
 
 class DiscreteEnvironment(EnvironmentBaseClass):
 
-    def __init__(self, game_map, max_actions=50):
+    def __init__(self, 
+        game_map, 
+        wins=None, 
+        deaths=None, 
+        max_actions=50,
+        init_mode="zero"
+    ):
         """Args:
 
         game_map <np.ndarray>: 1D array specifying the reward for moving to the 
@@ -77,15 +83,38 @@ class DiscreteEnvironment(EnvironmentBaseClass):
 
         self.game_map = game_map
 
+        self.win_states = wins if wins else np.argmax(game_map)
+        self.death_states = deaths if deaths else np.argmin(game_map)
+
         self._actions = self._generate_actions(self.game_map)
 
         self._max_actions = max_actions
 
+        self._init_mode = init_mode
+
     def initialize(self):
         """Set the inital state"""
 
-        # start at [0,0,..]
-        self.current_position = np.zeros_like(self.game_map.shape)
+        if self._init_mode == "zero":
+            # start at [0,0,..]
+            self.current_position = np.zeros_like(self.game_map.shape)
+        elif self._init_mode == "random":
+            
+            possible_states = np.arange(self.game_map.size)
+
+            # remove wins and deaths
+            possible_states = possible_states[~np.logical_or(
+                np.isin(possible_states, self.win_states),
+                np.isin(possible_states, self.death_states)
+            )]
+
+            self.current_position = np.array(np.unravel_index(
+                np.random.choice(possible_states),
+                self.game_map.shape
+            ))
+
+        else:
+            raise ValueError("Unknown init mode: " + str(self._init_mode))
 
         self._n_actions_performed = 0
 
@@ -150,10 +179,10 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         max_iter_exceeded = self._n_actions_performed >= self._max_actions 
         
         # the worst field in the map is like dying
-        has_died = self.current_state == np.argmin(self.game_map) # argmin gives linear index aka state ;)
+        has_died = np.isin(self.current_state, self.death_states)  # argmin gives linear index aka state ;)
 
         # the best field marks the goal
-        has_reached_goal = self.current_state == np.argmin(self.game_map)
+        has_reached_goal = np.isin(self.current_state, self.win_states)
         
         return max_iter_exceeded or has_died or has_reached_goal
 

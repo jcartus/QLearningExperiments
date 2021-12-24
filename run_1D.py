@@ -20,7 +20,10 @@ def main():
 
     game_map = generate_course()
 
-    environment = DiscreteEnvironment1D(game_map=game_map)
+    environment = DiscreteEnvironment1D(
+        game_map=game_map,
+        init_mode="random",
+    )
 
     agent = AgentBase(
         environment=environment,
@@ -42,13 +45,13 @@ def main():
     plt.subplot(n, 1, 3)
     analysis.plot_actions()
 
-    plt.figure()
-    sns.heatmap(agent._q_table)
+    plt.show()
+
     
     animate_episodes(agent, episodes=[0, 49], show=True, save_path="animations")
 
 
-    plt.show()
+    
         
 if __name__ == '__main__':
     main()
