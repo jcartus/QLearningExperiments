@@ -154,6 +154,22 @@ class AgentBase(object):
         for x in ["old_state", "new_state", "action", "reward"]:
             self._run_statistics[x] += self._episode_statistics[x]
 
+        self._run_statistics["finish"] += \
+            [self._evaluate_finial_state_of_env()]*n_steps
+
+    def _evaluate_finial_state_of_env(self):
+        """Get the state in which the agent has finished the game. 
+        I.e. win/death/iterations exceeded"""
+        state = self._env._evaluate_current_state()
+
+        if state == "unfinished":
+            if self._env._n_actions_performed == self._env._max_actions:
+                state = "max_iter_exceeded"
+            else:
+                state = "other"
+
+        return state
+
     @property
     def n_steps_run(self):
         try:

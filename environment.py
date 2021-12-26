@@ -176,17 +176,30 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         else:
             return gain
 
+    def _evaluate_current_state(self):
+        """Checks wether the current state is a win, a death or nothing."""
+
+        state = "unfinished"
+
+        # the worst field in the map is like dying
+        if np.isin(self.current_state, self.death_states):  # argmin gives linear index aka state ;)
+            state = "death"
+
+        # the best field marks the goal
+        if np.isin(self.current_state, self.win_states):
+            state = "win"
+
+        return state
+
+
     def is_episode_finished(self):
         # after a few iters we kill the game
         max_iter_exceeded = self._n_actions_performed >= self._max_actions 
         
-        # the worst field in the map is like dying
-        has_died = np.isin(self.current_state, self.death_states)  # argmin gives linear index aka state ;)
-
-        # the best field marks the goal
-        has_reached_goal = np.isin(self.current_state, self.win_states)
+        # check if current state means a win or a death
+        game_has_finished = self._evaluate_current_state() != "unfinished"
         
-        return max_iter_exceeded or has_died or has_reached_goal
+        return max_iter_exceeded or game_has_finished
 
 class DiscreteEnvironment1D(DiscreteEnvironment):
 
