@@ -51,11 +51,11 @@ def main():
         environment=environment,
         discount_factor=0.7,
         learning_rate=0.1,
-        epsilon_greedyness=0.2
+        epsilon_greedyness=0.5
     )
 
-    n_episodes = 100
-    agent.run(n_episodes=n_episodes)
+    n_episodes_train = 200
+    agent.run(n_episodes=n_episodes_train)
 
     analysis = AnalyzerRun(run_statistics=agent._run_statistics)
 
@@ -71,10 +71,15 @@ def main():
     plt.show()
 
     #TODO: plot whether agent won or died in episode vs episode
-    
+    agent._epsilon = 1
+    n_episodes_exploit = 3
+    agent.run(n_episodes=n_episodes_exploit)
+
+    n_episdes_tot = n_episodes_train + n_episodes_exploit
+
     animate_episodes(
         agent, 
-        episodes=[0, n_episodes-3, n_episodes-2, n_episodes-1], 
+        episodes=[0, n_episdes_tot-3, n_episdes_tot-2, n_episdes_tot-1], 
         show=True, 
         save_path="animations",
         wins=wins,
