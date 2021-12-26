@@ -70,7 +70,8 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         wins=None, 
         deaths=None, 
         max_actions=50,
-        init_mode="zero"
+        init_mode="zero",
+        reward_mode="gain_only"
     ):
         """Args:
 
@@ -91,6 +92,8 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         self._max_actions = max_actions
 
         self._init_mode = init_mode
+
+        self._reward_mode = reward_mode
 
     def initialize(self):
         """Set the inital state"""
@@ -165,16 +168,25 @@ class DiscreteEnvironment(EnvironmentBaseClass):
         self.current_position %= self.game_map.shape
 
     def reward(self, old_state, new_state):
-
-        gain = \
-            self.game_map.flatten()[new_state] - \
-                self.game_map.flatten()[old_state] # state is just linear index
-
-        if gain == 0:
-            # if nothing was gained, punish the agent slightly
-            return -1
+        
+        if self._reward_mode in ["gain_only", "cumulative"]:
+            gain = \
+                self.game_map.flatten()[new_state] - \
+                    self.game_map.flatten()[old_state] # state is just linear index
+       
+            if self._reward_mode == "gain_only":
+                
+                # if no gain then punish slightly
+                reward = gain if gain != 0 else -1
+                
+            elif self._reward_mode == "cumulative":
+                
+                reward = gain - self._n_actions_performed
+                
         else:
-            return gain
+            raise ValueError("Unknown reward mode: " + str(self._reward_mode))
+
+        return reward
 
     def _evaluate_current_state(self):
         """Checks wether the current state is a win, a death or nothing."""

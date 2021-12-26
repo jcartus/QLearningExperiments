@@ -40,7 +40,9 @@ def main():
 
     environment = DiscreteEnvironment(
         game_map=game_map,
+        #init_mode="zero",
         init_mode="random",
+        reward_mode="cumulative",
         wins=wins,
         deaths=deaths
     )
