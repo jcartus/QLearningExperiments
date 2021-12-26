@@ -120,7 +120,7 @@ class AgentBase(object):
 
             self.run_episode()
 
-            self._collect_run_statistics(i)
+            self._collect_run_statistics()
 
     def _init_episode_statistic(self):
         """Init buffer for logging"""
@@ -136,15 +136,18 @@ class AgentBase(object):
         self._episode_statistics["reward"].append(reward)
         self._episode_statistics["q_table"].append(self._q_table.copy())
 
-    def _collect_run_statistics(self, episode):
+    def _collect_run_statistics(self):
         """Do more logging, over many episodes."""
 
         if not hasattr(self, "_run_statistics"):
+            self._n_episodes_run = -1
             self._run_statistics = defaultdict(list)
 
         n_steps = self._env._n_actions_performed
 
-        self._run_statistics["episode"] += [episode]*n_steps
+        self._n_episodes_run += 1
+
+        self._run_statistics["episode"] += [self._n_episodes_run]*n_steps
         self._run_statistics["n_steps"] += [n_steps]*n_steps
         
 
