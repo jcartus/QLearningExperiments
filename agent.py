@@ -151,7 +151,7 @@ class AgentBase(object):
         self._run_statistics["n_steps"] += [n_steps]*n_steps
         
 
-        for x in ["old_state", "new_state", "action", "reward"]:
+        for x in ["step", "old_state", "new_state", "action", "reward"]:
             self._run_statistics[x] += self._episode_statistics[x]
 
         self._run_statistics["finish"] += \

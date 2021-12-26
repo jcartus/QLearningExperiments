@@ -112,6 +112,24 @@ class AnalyzerRun(object):
         plt.ylabel("x times selected / 1")
         plt.legend()
 
+    def plot_average_final_state(self):
+        x = self.df["episode"].unique()
+        
+        mean_rate = {f: [
+            np.mean(self.df[
+                (self.df.episode <= xi) & (self.df.step == 0)
+            ]["finish"] == f) * 1e2 \
+                for xi in x
+        ] for f in ["win", "death", "max_iter_exceeded", "other"]}
+
+        for f, y in mean_rate.items():
+            plt.plot(x, y, "x-", label=f)
+        
+        
+        plt.xlabel("episode / 1")
+        plt.ylabel("rate of finishes / %")
+        plt.legend()
+
 
 class EpisodeAnimator(object):
     """Creates a nice animation of the moves done during an episode"""

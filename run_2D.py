@@ -31,17 +31,29 @@ def generate_square():
         [ 0, 0, win ]
     ]).transpose(), win, death
 
+def generate_square_w_wall():
+    win = 7
+    death = -15
+    return np.array([
+        [  0, 0, 0, 0, 0],
+        [  0, death, death, death, 0],
+        [  0, death, 0, 0, 0],
+        [  0, death, 0, 0, 0],
+        [ 0, 0, 0, 0, win ]
+    ]).transpose(), win, death
+
 def main():
 
     #game_map, win_values, death_values = generate_course_1()
-    game_map, win_values, death_values = generate_square()
+    #game_map, win_values, death_values = generate_square()
+    game_map, win_values, death_values = generate_square_w_wall()
     wins = np.arange(game_map.size)[game_map.flatten() == win_values]
     deaths = np.arange(game_map.size)[game_map.flatten() == death_values]
 
     environment = DiscreteEnvironment(
         game_map=game_map,
-        #init_mode="zero",
-        init_mode="random",
+        init_mode="zero",
+        #init_mode="random",
         reward_mode="cumulative",
         wins=wins,
         deaths=deaths
@@ -49,28 +61,39 @@ def main():
 
     agent = AgentBase(
         environment=environment,
-        discount_factor=0.7,
-        learning_rate=0.1,
+        discount_factor=0.8,
+        learning_rate=0.2,
         epsilon_greedyness=0.5
     )
 
-    n_episodes_train = 200
-    agent.run(n_episodes=n_episodes_train)
 
+    #--- do training ---
+    n_episodes_train = 500
+    agent.run(n_episodes=n_episodes_train)
+    #---
+
+
+    #--- plot analysis plots ---
     analysis = AnalyzerRun(run_statistics=agent._run_statistics)
 
-    plt.figure(figsize=(6, 9))
-    n = 3
+    plt.figure(figsize=(6, 10))
+    n = 4
     plt.subplot(n, 1, 1)
     analysis.plot_steps()
     plt.subplot(n, 1, 2)
     analysis.plot_reward()
     plt.subplot(n, 1, 3)
     analysis.plot_actions()
+    plt.subplot(n, 1, 4)
+    analysis.plot_average_final_state()
+
+    plt.tight_layout()
 
     plt.show()
+    #---
 
-    #TODO: plot whether agent won or died in episode vs episode
+
+    #--- do additional exploitation runs to recods gifs ---
     agent._epsilon = 1
     n_episodes_exploit = 3
     agent.run(n_episodes=n_episodes_exploit)
@@ -79,12 +102,13 @@ def main():
 
     animate_episodes(
         agent, 
-        episodes=[0, n_episdes_tot-3, n_episdes_tot-2, n_episdes_tot-1], 
+        episodes=[0, n_episdes_tot-2, n_episdes_tot-1], 
         show=True, 
         save_path="animations",
         wins=wins,
         deaths=deaths
     )
+    #---
 
 
     
