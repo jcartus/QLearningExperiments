@@ -13,20 +13,30 @@ from analysis import AnalyzerEpisode, AnalyzerRun, animate_episodes
 
 import seaborn as sns
 
-def generate_course():
-    win = 30
-    death = -30
+def generate_course_1():
+    win = 5
+    death = -10
     return np.array([
         [  0, 0, 0, 1, 0, win, 0, death, 1, 0, 0],
         [death, 0, 0, 4, 0,  0, 0,   0, 5, 0, 0],
         [death, 0, 0, 4, 0,  0, 0,   0, 5, 0, win]
-    ]).transpose()
+    ]).transpose(), win, death
+
+def generate_square():
+    win = 5
+    death = -10
+    return np.array([
+        [  0, 0, 0],
+        [  0, death, 0],
+        [ 0, 0, win ]
+    ]).transpose(), win, death
 
 def main():
 
-    game_map = generate_course()
-    wins = np.arange(game_map.size)[game_map.flatten() == 30]
-    deaths = np.arange(game_map.size)[game_map.flatten() == -30]
+    #game_map, win_values, death_values = generate_course_1()
+    game_map, win_values, death_values = generate_square()
+    wins = np.arange(game_map.size)[game_map.flatten() == win_values]
+    deaths = np.arange(game_map.size)[game_map.flatten() == death_values]
 
     environment = DiscreteEnvironment(
         game_map=game_map,
