@@ -12,8 +12,7 @@ which learns to master this mini-game via basic Q-learning.
 # Agent performance
 
 This is the first episode (untrained agent):
-<Todo include gif here>
-
+![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
 
 A few episodes later ...
-<Todo include gif here>
+![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
