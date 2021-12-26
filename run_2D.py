@@ -14,16 +14,19 @@ from analysis import AnalyzerEpisode, AnalyzerRun, animate_episodes
 import seaborn as sns
 
 def generate_course():
+    win = 30
+    death = -30
     return np.array([
-        [  0, 0, 0, 1, 0, 16, 0, -20, 1, 0, 0],
-        [-20, 0, 0, 4, 0,  0, 0,   0, 5, 0, 0]
-    ])
+        [  0, 0, 0, 1, 0, win, 0, death, 1, 0, 0],
+        [death, 0, 0, 4, 0,  0, 0,   0, 5, 0, 0],
+        [death, 0, 0, 4, 0,  0, 0,   0, 5, 0, win]
+    ]).transpose()
 
 def main():
 
     game_map = generate_course()
-    wins = np.arange(game_map.size)[game_map.flatten() == 16]
-    deaths = np.arange(game_map.size)[game_map.flatten() == -20]
+    wins = np.arange(game_map.size)[game_map.flatten() == 30]
+    deaths = np.arange(game_map.size)[game_map.flatten() == -30]
 
     environment = DiscreteEnvironment(
         game_map=game_map,
@@ -39,7 +42,8 @@ def main():
         epsilon_greedyness=0.2
     )
 
-    agent.run(n_episodes=50)
+    n_episodes = 100
+    agent.run(n_episodes=n_episodes)
 
     analysis = AnalyzerRun(run_statistics=agent._run_statistics)
 
@@ -54,8 +58,16 @@ def main():
 
     plt.show()
 
+    #TODO: plot whether agent won or died in episode vs episode
     
-    animate_episodes(agent, episodes=[0, 49], show=True, save_path="animations")
+    animate_episodes(
+        agent, 
+        episodes=[0, n_episodes-3, n_episodes-2, n_episodes-1], 
+        show=True, 
+        save_path="animations",
+        wins=wins,
+        deaths=deaths
+    )
 
 
     

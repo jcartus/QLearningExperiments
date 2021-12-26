@@ -116,7 +116,7 @@ class AnalyzerRun(object):
 class EpisodeAnimator(object):
     """Creates a nice animation of the moves done during an episode"""
 
-    def __init__(self, game_map, states):
+    def __init__(self, game_map, states, wins=None, deaths=None):
 
         if len(game_map.shape) == 1:
             self.game_map = game_map.reshape(-1, 1)
@@ -127,8 +127,8 @@ class EpisodeAnimator(object):
 
         self.states = states
 
-        self.win = [np.argmax(self.game_map)]
-        self.death = [np.argmin(self.game_map)]
+        self.win = wins if not wins is None  else [np.argmax(self.game_map)]
+        self.death = deaths if not deaths is None else [np.argmin(self.game_map)]
 
     def position_from_state(self, state):
         """State is a scalar index, get position on map"""
@@ -188,18 +188,20 @@ class EpisodeAnimator(object):
         # mark the start position
         self.mark_position(start_state, color="grey")
 
-    def make_animation(self, fig, interval=200):
+    def make_animation(self, fig, interval=200, repeat=True):
         """Create and return an animation"""
         import matplotlib.animation as animation
 
         def init():
             self.visualize_map_and_landmarks(start_state=self.states[0])
             self.mark_position(self.states[0])
+            plt.title("Step 0")
 
         def animate(i):
             plt.clf()
             self.visualize_map_and_landmarks(start_state=self.states[0])
             self.mark_position(self.states[i])
+            plt.title(f"Step {i}")
 
 
         anim = animation.FuncAnimation(
@@ -207,14 +209,14 @@ class EpisodeAnimator(object):
             animate, 
             init_func=init, 
             frames=len(self.states), 
-            repeat=False,
+            repeat=repeat,
             interval=interval
         )
         
         return anim
 
 
-def animate_episodes(agent, episodes=-1, save_path=None, show=False):
+def animate_episodes(agent, episodes=-1, save_path=None, show=False, wins=None, deaths=None):
     """Create an animation for moves in specified episodes."""
 
     game_map = agent._env.game_map
@@ -234,6 +236,8 @@ def animate_episodes(agent, episodes=-1, save_path=None, show=False):
         animator = EpisodeAnimator(
             game_map=game_map,
             states=states, 
+            wins=wins,
+            deaths=deaths
         )
 
         fig = plt.figure(figsize=(10, 4))
