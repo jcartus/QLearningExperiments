@@ -36,7 +36,7 @@ class AgentBase(object):
 
     def _select_next_action(self):
 
-        if np.random.rand() >= self._epsilon:
+        if np.random.rand() <= self._epsilon:
 
             # choose random action
             action = np.random.choice(self._env.actions)
