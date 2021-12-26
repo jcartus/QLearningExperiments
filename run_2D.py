@@ -32,7 +32,7 @@ def generate_square():
     ]).transpose(), win, death
 
 def generate_square_w_wall():
-    win = 7
+    win = 5
     death = -15
     return np.array([
         [  0, 0, 0, 0, 0],

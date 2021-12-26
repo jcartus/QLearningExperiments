@@ -82,9 +82,12 @@ class AnalyzerRun(object):
         y = dfp["n_steps"]
 
         plt.plot(x, y, "x-", label="steps")
+        plt.plot(x, np.cumsum(y)/np.arange(1, len(y)+1), "-", label="avg.")
         
         plt.xlabel("episode / 1")
         plt.ylabel("n_steps / 1")
+
+        plt.legend()
 
     def plot_reward(self):
 
